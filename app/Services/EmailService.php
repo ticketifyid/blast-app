@@ -32,7 +32,7 @@ class EmailService
     public function send(string $email, string $subject, string $body): array
     {
         try {
-            Mail::mailer('smtp')->html(nl2br($body), function ($message) use ($email, $subject) {
+            Mail::mailer('smtp')->html($body, function ($message) use ($email, $subject) {
                 $message->to($email)->subject($subject);
             });
 

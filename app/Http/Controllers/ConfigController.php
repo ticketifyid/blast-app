@@ -22,9 +22,11 @@ class ConfigController extends Controller
         $request->validate([
             'type'              => 'required|in:whatsapp,smtp',
 
-            'whatsapp.base_url' => 'required_if:type,whatsapp|url',
-            'whatsapp.api_key'  => 'required_if:type,whatsapp|string',
-            'whatsapp.sender'   => 'required_if:type,whatsapp|string',
+            'whatsapp.base_url'   => 'required_if:type,whatsapp|url',
+            'whatsapp.api_key'    => 'required_if:type,whatsapp|string',
+            'whatsapp.sender'     => 'required_if:type,whatsapp|string',
+            'whatsapp.delay_min'  => 'required_if:type,whatsapp|integer|min:1',
+            'whatsapp.delay_max'  => 'required_if:type,whatsapp|integer|min:1',
 
             'smtp.host'         => 'required_if:type,smtp|string',
             'smtp.port'         => 'required_if:type,smtp|numeric',

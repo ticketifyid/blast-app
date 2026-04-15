@@ -41,6 +41,29 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Delay Min (detik)</label>
+                                <input type="number" name="whatsapp[delay_min]" min="1"
+                                    class="form-control @error('whatsapp.delay_min') is-invalid @enderror"
+                                    value="{{ old('whatsapp.delay_min', $whatsapp['delay_min'] ?? 5) }}">
+                                @error('whatsapp.delay_min')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Delay Max (detik)</label>
+                                <input type="number" name="whatsapp[delay_max]" min="1"
+                                    class="form-control @error('whatsapp.delay_max') is-invalid @enderror"
+                                    value="{{ old('whatsapp.delay_max', $whatsapp['delay_max'] ?? 15) }}">
+                                @error('whatsapp.delay_max')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-12">
+                                <div class="form-text">Jeda acak antar pesan WA untuk menghindari deteksi spam. Default: 5–15 detik.</div>
+                            </div>
+                        </div>
                         <button type="submit" class="btn btn-dark btn-sm">Simpan</button>
                     </form>
                 </div>

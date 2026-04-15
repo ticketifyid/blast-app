@@ -15,6 +15,7 @@ class BlastService
         private EmailService         $emailService,
         private ContactImportService $contactImportService,
         private QrCodeService        $qrCodeService,
+        private ConfigService        $configService,
     ) {}
 
     public function execute(Campaign $campaign): void
@@ -84,7 +85,7 @@ class BlastService
                 $result['error'] ?? null,
             );
 
-            sleep(1);
+            $campaign->isWa() ? $this->waDelay() : sleep(1);
         }
     }
 
@@ -126,9 +127,17 @@ class BlastService
                         $result['error'] ?? null,
                     );
 
-                    sleep(1);
+                    $campaign->isWa() ? $this->waDelay() : sleep(1);
                 }
             });
+    }
+
+    private function waDelay(): void
+    {
+        $wa  = $this->configService->getWhatsapp();
+        $min = max(1, (int) ($wa['delay_min'] ?? 5));
+        $max = max($min, (int) ($wa['delay_max'] ?? 15));
+        sleep(rand($min, $max));
     }
 
     private function sendMessage(Campaign $campaign, string $target, string $body, ?string $subject = null, ?string $qrUrl = null): array
