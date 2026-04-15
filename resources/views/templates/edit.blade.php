@@ -62,13 +62,19 @@
                 @endif
 
                 <div class="mb-3">
-                    <label class="form-label">Body</label>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label mb-0">Body</label>
+                        <button type="button" id="toggle-source" class="btn btn-outline-secondary btn-sm" style="{{ old('channel', $template->channel) === 'wa' ? 'display:none' : '' }}" onclick="toggleSource()">
+                            &lt;/&gt; Source HTML
+                        </button>
+                    </div>
                     {{-- WA: plain textarea --}}
                     <textarea name="body" id="body-wa" class="form-control @error('body') is-invalid @enderror" rows="8"
                         style="{{ old('channel', $template->channel) === 'email' ? 'display:none' : '' }}">{{ old('body', $template->channel === 'wa' ? $template->body : '') }}</textarea>
                     {{-- Email: Quill editor --}}
                     <div id="quill-wrapper" style="{{ old('channel', $template->channel) === 'wa' ? 'display:none' : '' }}">
                         <div id="quill-editor" style="min-height:200px"></div>
+                        <textarea id="body-source" class="form-control font-monospace" rows="12" style="display:none;font-size:.85rem"></textarea>
                         <textarea name="body" id="body-email" class="d-none"></textarea>
                     </div>
                     @error('body')
@@ -108,11 +114,34 @@
             quill.root.innerHTML = @json(old('body', $template->body));
         @endif
 
+        let sourceMode = false;
+
+        function toggleSource() {
+            const editor = document.getElementById('quill-editor');
+            const source = document.getElementById('body-source');
+            const btn    = document.getElementById('toggle-source');
+
+            if (!sourceMode) {
+                source.value = quill.root.innerHTML;
+                editor.style.display = 'none';
+                source.style.display = 'block';
+                btn.textContent = 'Visual Editor';
+                sourceMode = true;
+            } else {
+                quill.root.innerHTML = source.value;
+                source.style.display = 'none';
+                editor.style.display = 'block';
+                btn.innerHTML = '<\/> Source HTML';
+                sourceMode = false;
+            }
+        }
+
         function toggleSubject() {
             const channel = document.getElementById('channel').value;
             document.getElementById('subject-field').style.display = channel === 'email' ? 'block' : 'none';
             document.getElementById('body-wa').style.display = channel === 'wa' ? 'block' : 'none';
             document.getElementById('quill-wrapper').style.display = channel === 'email' ? 'block' : 'none';
+            document.getElementById('toggle-source').style.display = channel === 'email' ? 'block' : 'none';
             document.getElementById('body-wa').name = channel === 'wa' ? 'body' : '';
             document.getElementById('body-email').name = channel === 'email' ? 'body' : '';
         }
@@ -120,9 +149,17 @@
         function insertVariable(varName) {
             const channel = document.getElementById('channel').value;
             if (channel === 'email') {
-                const range = quill.getSelection(true);
-                quill.insertText(range.index, '{{' + varName + '}}');
-                quill.setSelection(range.index + varName.length + 4);
+                if (sourceMode) {
+                    const ta = document.getElementById('body-source');
+                    const pos = ta.selectionStart;
+                    ta.value = ta.value.substring(0, pos) + '{{' + varName + '}}' + ta.value.substring(pos);
+                    ta.focus();
+                    ta.selectionStart = ta.selectionEnd = pos + varName.length + 4;
+                } else {
+                    const range = quill.getSelection(true);
+                    quill.insertText(range.index, '{{' + varName + '}}');
+                    quill.setSelection(range.index + varName.length + 4);
+                }
             } else {
                 const textarea = document.getElementById('body-wa');
                 const start = textarea.selectionStart;
@@ -134,11 +171,15 @@
             }
         }
 
-        // Sync Quill content to hidden textarea before submit
+        // Sync content to hidden textarea before submit
         document.querySelector('form').addEventListener('submit', function () {
             const channel = document.getElementById('channel').value;
             if (channel === 'email') {
-                document.getElementById('body-email').value = quill.root.innerHTML;
+                if (sourceMode) {
+                    document.getElementById('body-email').value = document.getElementById('body-source').value;
+                } else {
+                    document.getElementById('body-email').value = quill.root.innerHTML;
+                }
             }
         });
 
