@@ -46,8 +46,6 @@ class BlastService
         $phoneCol = $campaign->phone_column;
         $emailCol = $campaign->email_column;
 
-        $seen = [];
-
         foreach ($rows as $row) {
             $phone  = $phoneCol ? ($row[$phoneCol] ?? null) : null;
             $email  = $emailCol ? ($row[$emailCol] ?? null) : null;
@@ -55,13 +53,6 @@ class BlastService
             $target = $campaign->isWa() ? $phone : $email;
 
             if (!$target) continue;
-
-            if (in_array($target, $seen)) {
-                $this->logRecipient($campaign, $name, $phone, $email, 'skipped', 'Duplicate');
-                continue;
-            }
-
-            $seen[] = $target;
 
             $qrUrl = null;
             if ($campaign->use_qr && $campaign->qr_column && isset($row[$campaign->qr_column])) {
