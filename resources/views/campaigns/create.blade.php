@@ -215,7 +215,7 @@ function toggleChannel() {
     const channel = document.getElementById('channel').value;
     document.getElementById('subject-field').style.display  = channel === 'email' ? 'block' : 'none';
     document.getElementById('image-section').style.display  = channel === 'wa' ? 'block' : 'none';
-    document.getElementById('qr-section').style.display     = channel === 'wa' ? 'block' : 'none';
+    document.getElementById('qr-section').style.display     = 'block';
 }
 
 function toggleQr() {

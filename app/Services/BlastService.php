@@ -63,16 +63,17 @@ class BlastService
 
             $seen[] = $target;
 
-            $body = $this->templateService->render($campaign->body, $row);
-
             $qrUrl = null;
-            if ($campaign->isWa() && $campaign->use_qr && $campaign->qr_column && isset($row[$campaign->qr_column])) {
+            if ($campaign->use_qr && $campaign->qr_column && isset($row[$campaign->qr_column])) {
                 $qrUrl = $this->qrCodeService->saveAndGetUrl($row[$campaign->qr_column]);
+                $row['qr_url'] = $qrUrl;
             }
+
+            $body = $this->templateService->render($campaign->body, $row);
 
             $result = $this->sendMessage($campaign, $target, $body, $campaign->subject, $qrUrl);
 
-            if ($qrUrl) {
+            if ($qrUrl && $campaign->isWa()) {
                 $this->qrCodeService->deleteQr($row[$campaign->qr_column]);
             }
 
